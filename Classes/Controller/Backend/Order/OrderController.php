@@ -13,6 +13,7 @@ use Extcode\Cart\Domain\Model\Cart\Cart;
 use Extcode\Cart\Domain\Model\Order\Item;
 use Extcode\Cart\Domain\Repository\Order\ItemRepository;
 use Extcode\Cart\Event\Order\NumberGeneratorEvent;
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Pagination\SimplePagination;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
@@ -98,7 +99,7 @@ class OrderController extends ActionController
         $this->view->assign('pdfRendererInstalled', $pdfRendererInstalled);
     }
 
-    public function exportAction(): void
+    public function exportAction(): ResponseInterface
     {
         $format = $this->request->getFormat();
 
@@ -113,20 +114,11 @@ class OrderController extends ActionController
         $title = 'Order-Export-' . date('Y-m-d_H-i');
         $filename = $title . '.' . $format;
 
-        if ($this->responseFactory) {
-            $this->responseFactory->createResponse()
-                ->withAddedHeader('Content-Type', 'text/' . $format)
-                ->withAddedHeader('Content-Description', 'File transfer')
-                ->withAddedHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
-            return;
-        }
-
-        if ($this->response) {
-            // set response header in TYPO3 v10
-            $this->response->setHeader('Content-Type', 'text/' . $format, true);
-            $this->response->setHeader('Content-Description', 'File transfer', true);
-            $this->response->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"', true);
-        }
+        return $this->htmlResponse()
+            ->withHeader('Content-Type', 'text/' . $format)
+            ->withAddedHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->withAddedHeader('Content-Description', 'File transfer')
+            ->withAddedHeader('Pragma', 'no-cache');
     }
 
     /**
