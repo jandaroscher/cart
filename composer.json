@@ -3,7 +3,6 @@
     "type": "typo3-cms-extension",
     "description": "Shopping Cart(s) for TYPO3",
     "homepage": "https://cart.extco.de",
-    "version": "8.6.1",
     "license": [
         "GPL-2.0-or-later"
     ],
